@@ -166,7 +166,6 @@ app.get('/searchcourse/:key',async(req,resp)=>{
         '$or':[
             {fname:{$regex:req.params.key}},
             {sname:{$regex:req.params.key}},
-            {price:{$regex:req.params.key}}
         ]
     })
     if(course.length>0){
@@ -235,10 +234,8 @@ app.put('/updatespecialisation/:id',async(req,resp)=>{
 app.get('/searchspecialisation/:key',async(req,resp)=>{
     let specialisation = await Specialisation.find({
         '$or':[
-            {cname:{$regex:req.params.key}},
             {fname:{$regex:req.params.key}},
             {sname:{$regex:req.params.key}},
-            {price:{$regex:req.params.key}}
         ]
     })
     if(specialisation.length>0){
@@ -360,6 +357,77 @@ app.put('/updateemitenure/:id',async(req,resp)=>{
     )
     resp.send(result)
 })
+
+
+
+// FeeStructure
+
+app.get('/feestructure',async(req,resp)=>{
+    let feestructure = await FeeStructure.find()
+    if(feestructure.length>0){
+        resp.send(feestructure)
+    }
+    else{
+        resp.send({result:'no feestructure found'})
+    }
+})
+
+// avoid dublicate data
+app.post('/feestructure',async(req,resp)=>{
+    let result = await FeeStructure.findOne(req.body)
+    if(result){
+        resp.send(result)
+    }
+    else{
+        resp.send({result:'no feestructure found'})
+    }
+})
+
+app.post('/addfeestructure',async(req,resp)=>{
+    let feestructure = new FeeStructure(req.body)
+    let result = await feestructure.save()
+    resp.send(result)
+})
+
+app.delete('/deletefeestructure/:id',async(req,resp)=>{
+    let result = await FeeStructure.deleteOne({_id:req.params.id})
+    resp.send(result)
+})
+
+// pre-filled data
+app.get('/updatefeestructure/:id',async(req,resp)=>{
+    let feestructure = await FeeStructure.findOne({_id:req.params.id})
+    if(feestructure){
+        resp.send(feestructure)
+    }
+    else{
+        resp.send({result:'no feestructure found'})
+    }
+})
+
+app.put('/updatefeestructure/:id',async(req,resp)=>{
+    let result = await FeeStructure.updateOne(
+        {_id:req.params.id},
+        {$set:req.body}
+    )
+    resp.send(result)
+})
+
+app.get('/searchfeestructure/:key',async(req,resp)=>{
+    let feestructure = await FeeStructure.find({
+        '$or':[
+            {name:{$regex:req.params.key}},
+            {state:{$regex:req.params.key}}
+        ]
+    })
+    if(feestructure.length>0){
+        resp.send(feestructure)
+    }
+    else{
+        resp.send({result:'no feestructure found'})
+    }
+})
+
 
 
 
