@@ -640,4 +640,15 @@ app.get('/searchdetail/:key',async(req,resp)=>{
 })
 
 
-app.listen(5000)
+app.listen(5000,()=>{
+    console.log(' ')
+    console.log('Compiled successfully!')
+    console.log('Compiled successfully!')
+    console.log('Compiled successfully!')
+    console.log('Compiled successfully!')
+    console.log('Compiled successfully!')
+    console.log(' ')
+    console.log('You can now view Backend in the browser.')
+    console.log(' ')
+    console.log('Port : http://localhost:5000')
+})
