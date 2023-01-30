@@ -679,12 +679,12 @@ app.get('/searchdetail/:key',async(req,resp)=>{
 app.listen(5000,()=>{
     console.log(' ')
     console.log('Compiled successfully!')
-    console.log('Compiled successfully!')
     console.log(' ')
     console.log('You can now view backend in the browser.')
     console.log(' ')
     console.log('  http://localhost:5000')
     console.log(' ')
+    console.log('Compiled successfully!')
     console.log('Compiled successfully!')
     console.log('Compiled successfully!')
 })
