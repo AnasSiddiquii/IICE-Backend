@@ -417,8 +417,14 @@ app.put('/updatefeestructure/:id',async(req,resp)=>{
 app.get('/searchfeestructure/:key',async(req,resp)=>{
     let feestructure = await FeeStructure.find({
         '$or':[
-            {name:{$regex:req.params.key}},
-            {state:{$regex:req.params.key}}
+            {uname:{$regex:req.params.key}},
+            {cname:{$regex:req.params.key}},
+            {cname:{$regex:req.params.key}},
+            {month1:{$regex:req.params.key}},
+            {month3:{$regex:req.params.key}},
+            {month6:{$regex:req.params.key}},
+            {month9:{$regex:req.params.key}},
+            {month12:{$regex:req.params.key}}
         ]
     })
     if(feestructure.length>0){
