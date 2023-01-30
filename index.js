@@ -10,6 +10,7 @@ const FeeStructure = require('./db/FeeStructure')
 const EMITenure = require('./db/EMITenure')
 const Student = require('./db/Student')
 const Franchise = require('./db/Franchise')
+const Referral = require('./db/Referral')
 const Detail = require('./db/Detail')
 const app = express()
 
@@ -582,6 +583,35 @@ app.get('/searchfranchise/:key',async(req,resp)=>{
 
 
 
+// Referral
+
+// app.post('/referral',async(req,resp)=>{
+//     let referral = new Referral(req.body)
+//     let result = await referral.save()
+//     resp.send(result)
+// })
+
+// pre-filled data
+app.get('/updatereferral/:id',async(req,resp)=>{
+    let referral = await Referral.findOne({_id:req.params.id})
+    if(referral){
+        resp.send(referral)
+    }
+    else{
+        resp.send({result:'no referral found'})
+    }
+})
+
+app.put('/updatereferral/:id',async(req,resp)=>{
+    let result = await Referral.updateOne(
+        {_id:req.params.id},
+        {$set:req.body}
+    )
+    resp.send(result)
+})
+
+
+
 // Details
 
 app.get('/details',async(req,resp)=>{
@@ -644,11 +674,11 @@ app.listen(5000,()=>{
     console.log(' ')
     console.log('Compiled successfully!')
     console.log('Compiled successfully!')
-    console.log('Compiled successfully!')
-    console.log('Compiled successfully!')
-    console.log('Compiled successfully!')
     console.log(' ')
-    console.log('You can now view Backend in the browser.')
+    console.log('You can now view backend in the browser.')
     console.log(' ')
-    console.log('Port : http://localhost:5000')
+    console.log('  http://localhost:5000')
+    console.log(' ')
+    console.log('Compiled successfully!')
+    console.log('Compiled successfully!')
 })
