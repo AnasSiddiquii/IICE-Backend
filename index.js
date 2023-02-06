@@ -76,7 +76,7 @@ app.delete('/deleteuniversity/:id',async(req,resp)=>{
 // pre-filled data
 app.get('/updateuniversity/:id',async(req,resp)=>{
     let university = await University.findOne({_id:req.params.id})
-    if(universsity){
+    if(university){
         resp.send(university)
     }
     else{
