@@ -11,7 +11,9 @@ const studentSchema = new mongoose.Schema({
     idProof:String,
     address:String,
     photo:String,
-    level:String
+    level:String,
+    password:String,
+    post:String
 })
 
 module.exports = mongoose.model('students',studentSchema)

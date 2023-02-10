@@ -18,7 +18,7 @@ app.use(express.json())
 app.use(cors())
 
 
-
+// admin login
 app.post('/signup',async(req,resp)=>{
     let user = new User(req.body)
     let result = await user.save()
@@ -28,7 +28,7 @@ app.post('/signup',async(req,resp)=>{
 })
 
 app.post('/login',async(req,resp)=>{
-    let result = await User.findOne(req.body).select('-password')
+    let result = await User.findOne(req.body).select(['-password'])
     if(result){
         resp.send(result)
     }
@@ -37,6 +37,26 @@ app.post('/login',async(req,resp)=>{
     }
 })
 
+// app.get('/users',async(req,resp)=>{
+//     let user = await User.find()
+//     if(user.length>0){
+//         resp.send(user)
+//     }
+//     else{
+//         resp.send({result:'no user found'})
+//     }
+// })
+
+// student login
+app.post('/std',async(req,resp)=>{
+    let result = await Student.findOne(req.body).select(['-address', '-contact', '-altContact', '-dob', '-father', '-mother', '-idProof', '-photo', '-password'])
+    if(result){
+        resp.send(result)
+    }
+    else{
+        resp.send({result:'no user found'})
+    }
+})
 
 
 // Universities
@@ -464,6 +484,8 @@ app.post('/students',async(req,resp)=>{
 app.post('/addstudent',async(req,resp)=>{
     let student = new Student(req.body)
     let result = await student.save()
+    result = result.toObject()
+    delete result.password
     resp.send(result)
 })
 
