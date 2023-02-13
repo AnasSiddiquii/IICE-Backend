@@ -613,6 +613,7 @@ app.get('/searchfranchise/:key',async(req,resp)=>{
 
 // Referral
 
+// for 1st time (when no data)
 // app.post('/referral',async(req,resp)=>{
 //     let referral = new Referral(req.body)
 //     let result = await referral.save()
@@ -678,14 +679,12 @@ app.delete('/deletedetail/:id',async(req,resp)=>{
 app.get('/searchdetail/:key',async(req,resp)=>{
     let detail = await Detail.find({
         '$or':[
-            {franchiseName:{$regex:req.params.key}},
             {studentName:{$regex:req.params.key}},
-            {universityName:{$regex:req.params.key}},
             {courseName:{$regex:req.params.key}},
             {specialisationName:{$regex:req.params.key}},
-            {price:{$regex:req.params.key}},
+            {universityName:{$regex:req.params.key}},
             {sessionYear:{$regex:req.params.key}},
-            {emiDuration:{$regex:req.params.key}},
+            {emiTenure:{$regex:req.params.key}},
             {emiAmount:{$regex:req.params.key}}
         ]
     })

@@ -1,14 +1,12 @@
 const mongoose = require('mongoose')
 
 const detailSchema = new mongoose.Schema({
-    franchiseName:String,
     studentName:String,
-    universityName:String,
     courseName:String,
     specialisationName:String,
-    price:String,
+    universityName:String,
     sessionYear:String,
-    emiDuration:String,
+    emiTenure:String,
     emiAmount:String
 })
 
