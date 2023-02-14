@@ -1,6 +1,7 @@
 {
-
+  "name": "backend",
   "homepage": "https://new.iice.foundation",
+  "main": "index.js",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
