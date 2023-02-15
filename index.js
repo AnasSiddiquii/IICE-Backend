@@ -18,6 +18,11 @@ app.use(express.json())
 app.use(cors())
 
 
+app.get('/', (req,resp)=>{
+    resp.send('Backend is working')
+})
+
+
 // admin login
 app.post('/signup',async(req,resp)=>{
     let user = new User(req.body)
