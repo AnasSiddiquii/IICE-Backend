@@ -20,11 +20,11 @@ app.use(cors())
 
 // testing
 app.get('/', (req,resp)=>{
-    resp.send('homepage is working')
+    resp.send('backend homepage is working')
 })
 
-app.get('/*', (req,resp)=>{
-    resp.send('all pages are working')
+app.get('/new', (req,resp)=>{
+    resp.send('backend new page is working')
 })
 
 
