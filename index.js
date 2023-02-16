@@ -18,8 +18,13 @@ app.use(express.json())
 app.use(cors())
 
 
+// testing
 app.get('/', (req,resp)=>{
-    resp.send('Backend is working')
+    resp.send('homepage is working')
+})
+
+app.get('/*', (req,resp)=>{
+    resp.send('all pages are working')
 })
 
 
