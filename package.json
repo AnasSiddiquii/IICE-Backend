@@ -3,10 +3,13 @@
   "homepage": "https://new.iice.foundation",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "startx": "node index.js",
+    "starty": "nodemon index.js",
+    "startz": "nodemon"
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "mongodb": "^4.13.0",
     "mongoose": "^6.8.3",

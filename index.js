@@ -1,6 +1,12 @@
-const express = require('express')
-const cors = require('cors')
+const dotenv = require('dotenv')
+dotenv.config({path: './config.env'})
+const PORT = process.env.PORT
 require('./db/config')
+
+const express = require('express')
+const app = express()
+const cors = require('cors')
+
 const User = require('./db/User')
 const University = require('./db/University')
 const Course = require('./db/Course')
@@ -12,7 +18,6 @@ const Student = require('./db/Student')
 const Franchise = require('./db/Franchise')
 const Referral = require('./db/Referral')
 const Detail = require('./db/Detail')
-const app = express()
 
 app.use(express.json())
 app.use(cors())
@@ -47,15 +52,15 @@ app.post('/login',async(req,resp)=>{
     }
 })
 
-// app.get('/users',async(req,resp)=>{
-//     let user = await User.find()
-//     if(user.length>0){
-//         resp.send(user)
-//     }
-//     else{
-//         resp.send({result:'no user found'})
-//     }
-// })
+app.get('/users',async(req,resp)=>{
+    let user = await User.find()
+    if(user.length>0){
+        resp.send(user)
+    }
+    else{
+        resp.send({result:'no user found'})
+    }
+})
 
 // student login
 app.post('/std',async(req,resp)=>{
@@ -707,15 +712,14 @@ app.get('/searchdetail/:key',async(req,resp)=>{
 })
 
 
-app.listen(5000,()=>{
-    console.log(' ')
-    console.log('Compiled successfully!')
+app.listen(PORT,()=>{
     console.log(' ')
     console.log('You can now view backend in the browser.')
     console.log(' ')
-    console.log('  http://localhost:5000')
+    console.log(`  http://localhost:${PORT}`)
+    console.log(`  http://localhost:${PORT}`)
     console.log(' ')
     console.log('Compiled successfully!')
     console.log('Compiled successfully!')
-    console.log('Compiled successfully!')
+    console.log(' ')
 })
