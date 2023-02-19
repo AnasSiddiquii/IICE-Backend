@@ -2,6 +2,7 @@ const dotenv = require('dotenv')
 dotenv.config({path: './config.env'})
 const PORT = process.env.PORT
 require('./db/config')
+const bcrypt = require('bcryptjs')
 
 const express = require('express')
 const app = express()
@@ -41,12 +42,18 @@ app.post('/signup',async(req,resp)=>{
 })
 
 app.post('/login',async(req,resp)=>{
-    let result = await User.findOne(req.body).select(['-password'])
-    if(result){
-        resp.send(result)
+    const login = await User.findOne({email : req.body.email})
+    if(login){
+        const result = await bcrypt.compare(req.body.password, login.password)
+        if(result){
+            resp.send(login)
+        }
+        else{
+            resp.send({result:'Invalid'})
+        }
     }
     else{
-        resp.send({result:'no user found'})
+        resp.send({result:'Invalid'})
     }
 })
 
