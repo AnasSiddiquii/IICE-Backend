@@ -37,8 +37,6 @@ app.get('/new', (req,resp)=>{
 app.post('/signup',async(req,resp)=>{
     let user = new User(req.body)
     let result = await user.save()
-    result = result.toObject()
-    delete result.password
     resp.send(result)
 })
 
@@ -499,8 +497,6 @@ app.post('/students',async(req,resp)=>{
 app.post('/addstudent',async(req,resp)=>{
     let student = new Student(req.body)
     let result = await student.save()
-    result = result.toObject()
-    delete result.password
     resp.send(result)
 })
 
