@@ -24,6 +24,45 @@ app.use(express.json())
 app.use(cors())
 
 
+
+/////////////////////////////////////////
+const multer = require("multer");
+const File = require('./db/File');
+
+app.use(express.static(__dirname+'/uploads'))
+
+const Storage = multer.diskStorage({
+    destination:'uploads',
+    filename:(req,file,cb)=>{
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + '-' + uniqueSuffix )
+        // cb(null,file.originalname)
+    }
+})
+
+const upload = multer({
+    storage:Storage
+})
+
+app.post("/img", upload.single('image'), async (req, resp) => {
+    let user = new File({img:req.file.filename,name:req.body.name});
+    let result = await user.save();
+    resp.send(result)
+})
+
+app.get("/img", async (req,resp)=>{
+    let data = await File.find()
+    resp.send(data)
+})
+
+app.delete('/img/:id', async (req,resp) => {
+    let result = await File.deleteOne()
+    resp.send(result)
+})
+/////////////////////////////////////////
+
+
+
 // testing
 app.get('/', (req,resp)=>{
     resp.send('backend homepage is working')
@@ -44,7 +83,7 @@ app.post('/signup',async(req,resp)=>{
 app.post('/login',async(req,resp)=>{
     const login = await User.findOne({email : req.body.email})
     if(login){
-        const result = await bcrypt.compare(req.body.password, login.password)
+        let result = await bcrypt.compare(req.body.password, login.password)
         if(result){
             resp.send(login)
         }
@@ -69,7 +108,7 @@ app.get('/users',async(req,resp)=>{
 
 // student login
 app.post('/std',async(req,resp)=>{
-    let result = await Student.findOne(req.body).select(['-address', '-contact', '-altContact', '-dob', '-father', '-mother', '-idProof', '-photo', '-password'])
+    let result = await Student.findOne(req.body).select(['name','email','level','post'])
     if(result){
         resp.send(result)
     }
