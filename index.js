@@ -23,7 +23,23 @@ const Detail = require('./db/Detail')
 app.use(express.json())
 app.use(cors())
 
-
+// blank
+// homepage
+app.get('/', (req, resp) => {
+    resp.send(`
+        <html>
+            <head>
+                <style>
+                    body {display: flex; justify-content: center; align-items: center; margin: 0;}
+                    h1 {background-color: black; color: green; border-radius: 50%; padding: 50px;}
+                </style>
+            </head>
+        <body>
+            <h1>IICE Foundation</h1>
+        </body>
+    </html>
+    `);
+});
 
 /////////////////////////////////////////
 const multer = require("multer");
@@ -35,14 +51,12 @@ const Storage = multer.diskStorage({
     destination:'uploads',
     filename:(req,file,cb)=>{
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + '-' + uniqueSuffix )
+        cb(null, file.fieldname + '-' + uniqueSuffix + '.png' )
         // cb(null,file.originalname)
     }
 })
 
-const upload = multer({
-    storage:Storage
-})
+const upload = multer({storage:Storage})
 
 app.post("/img", upload.single('image'), async (req, resp) => {
     let user = new File({img:req.file.filename,name:req.body.name});
@@ -60,18 +74,6 @@ app.delete('/img/:id', async (req,resp) => {
     resp.send(result)
 })
 /////////////////////////////////////////
-
-
-
-// testing
-app.get('/', (req,resp)=>{
-    resp.send('backend homepage is working')
-})
-
-app.get('/new', (req,resp)=>{
-    resp.send('backend new page is working')
-})
-
 
 // admin login
 app.post('/signup',async(req,resp)=>{
@@ -669,13 +671,6 @@ app.get('/searchfranchise/:key',async(req,resp)=>{
 
 
 // Referral
-
-// for 1st time (when no data)
-// app.post('/referral',async(req,resp)=>{
-//     let referral = new Referral(req.body)
-//     let result = await referral.save()
-//     resp.send(result)
-// })
 
 // pre-filled data
 app.get('/updatereferral/:id',async(req,resp)=>{
