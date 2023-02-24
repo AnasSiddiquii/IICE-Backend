@@ -31,13 +31,14 @@ app.get('/', (req, resp) => {
             <head>
                 <style>
                     body {display: flex; justify-content: center; align-items: center; margin: 0;}
-                    h1 {background-color: black; color: green; border-radius: 50%; padding: 50px;}
+                    h1 {background-color: black; border-radius: 50%; padding: 50px; box-shadow: 0px 0px 30px 10px gray;}
+                    a {text-decoration: none; color: green;}
                 </style>
             </head>
-        <body>
-            <h1>IICE Foundation</h1>
-        </body>
-    </html>
+            <body>
+                <h1><a href="https://the.iice.foundation">IICE Foundation</a></h1>
+            </body>
+        </html>
     `);
 });
 
