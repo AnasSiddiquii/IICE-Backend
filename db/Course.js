@@ -1,8 +1,14 @@
 const mongoose = require('mongoose')
 
 const courseSchema = new mongoose.Schema({
-    fname:String,
-    sname:String,
+    fname: {
+        type: String,
+        required: true
+    },
+    sname: {
+        type: String,
+        required: true
+    }
 })
 
 module.exports = mongoose.model('courses',courseSchema)
