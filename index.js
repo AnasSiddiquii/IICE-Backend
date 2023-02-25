@@ -24,7 +24,7 @@ app.use(express.json())
 app.use(cors())
 
 // homepage
-app.get('/', (req, resp) => {
+app.get('/', (req, resp)  =>  {
     resp.send(`
         <html>
             <head>
@@ -47,7 +47,7 @@ const File = require('./db/File');
 
 const Storage = multer.diskStorage({
     destination:'uploads',
-    filename:(req,file,cb)=>{
+    filename:(req,file,cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         cb(null, file.fieldname + '-' + uniqueSuffix + '.png' )
         // cb(null,file.originalname)
@@ -56,13 +56,13 @@ const Storage = multer.diskStorage({
 
 const upload = multer({storage:Storage})
 
-app.post("/img", upload.single('image'), async (req, resp) => {
+app.post("/img", upload.single('image'),  async  (req, resp)  =>  {
     const user = new File({img:req.file.filename,name:req.body.name});
     const result = await user.save();
     resp.send(result)
 })
 
-app.get("/img", async (req,resp)=>{
+app.get("/img", async (req,resp) => {
     const data = await File.find()
     resp.send(data)
 })
@@ -77,19 +77,19 @@ app.delete('/img/:id', async (req,resp) => {
 app.post('/signup', async (req,resp) => {
     const { name, email, password, cpassword, post } = req.body
     
-    if (!name || !email || !password || !cpassword || !post) {
-        return resp.status(400).json({ error: 'Please Fill All Fields' })
+    if(!name || !email || !password || !cpassword || !post){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
-    else {
-        const userExist = await User.findOne({ email: email })
+    else{
+        const userExists = await User.findOne({ email: email })
         
-        if (userExist) {
-            return resp.status(400).json({ error: 'Email Already Exists'})
+        if(userExists){
+            resp.status(400).json({ error: 'Email Already Exists' })
         }
-        else if (password != cpassword){
-            return resp.status(400).json({ error: 'Password Do Not Match'})
+        else if(password != cpassword){
+            resp.status(400).json({ error: 'Password Do Not Match' })
         }
-        else {
+        else{
             const user = new User({ name, email, password, cpassword, post })
             await user.save()
             resp.status(201).json({ message: 'Registered Successfully' })
@@ -100,29 +100,29 @@ app.post('/signup', async (req,resp) => {
 app.post('/login', async (req,resp) => {
     const { email, password } = req.body
     
-    if (!email || !password) {
-        return resp.status(400).json({ error: 'Please Fill All Fields' })
+    if(!email || !password){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
-    else {
-        const userExist = await User.findOne({ email: email })
+    else{
+        const userExists = await User.findOne({ email: email })
 
-        if (userExist) {
-            const match = await bcrypt.compare(password, userExist.password)
+        if(userExists){
+            const match = await bcrypt.compare(password, userExists.password)
                         
-            if (!match) {
-                return resp.status(400).json({ error: 'Invalid Credientials'})
+            if(!match){
+                resp.status(400).json({ error: 'Invalid Credientials'})
             }
-            else {
-                return resp.status(201).json({ message: 'Login Successful' })
+            else{
+                resp.status(202).json({ message: 'Login Successful' })
             }
         }
-        else {
-            return resp.status(400).json({ error: 'Invalid Credientials'})
+        else{
+            resp.status(400).json({ error: 'Invalid Credientials'})
         }
     }
 })
 
-app.get('/users',async(req,resp)=>{
+app.get( '/users', async (req,resp) => {
     const user = await User.find()
     if(user.length>0){
         resp.send(user)
@@ -133,7 +133,7 @@ app.get('/users',async(req,resp)=>{
 })
 
 // student login
-app.post('/std',async(req,resp)=>{
+app.post('/std', async (req,resp) => {
     const result = await Student.findOne(req.body).select(['name','email','level','post'])
     if(result){
         resp.send(result)
@@ -144,9 +144,10 @@ app.post('/std',async(req,resp)=>{
 })
 
 
+
 // Universities
 
-app.get('/universities',async(req,resp)=>{
+app.get('/universities', async (req,resp) => {
     const university = await University.find()
     if(university.length>0){
         resp.send(university)
@@ -156,30 +157,33 @@ app.get('/universities',async(req,resp)=>{
     }
 })
 
-// avoid dublicate data
-app.post('/universities',async(req,resp)=>{
-    const result = await University.findOne(req.body)
-    if(result){
-        resp.send(result)
+app.post('/adduniversity', async (req,resp) => {
+    const { name, logo, state } = req.body
+    
+    if(!name || !logo || !state){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no university found'})
+        const universityExists = await University.findOne({ name: name, state: state })
+
+        if(universityExists){
+            resp.status(400).json({ error: 'University Already Exists' })
+        }
+        else{
+            const university = new University({ name, logo, state })
+            await university.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
+        }
     }
 })
 
-app.post('/adduniversity',async(req,resp)=>{
-    const university = new University(req.body)
-    const result = await university.save()
-    resp.send(result)
-})
-
-app.delete('/deleteuniversity/:id',async(req,resp)=>{
+app.delete('/deleteuniversity/:id', async (req,resp) => {
     const result = await University.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
-app.get('/updateuniversity/:id',async(req,resp)=>{
+app.get('/updateuniversity/:id', async (req,resp) => {
     const university = await University.findOne({_id:req.params.id})
     if(university){
         resp.send(university)
@@ -189,7 +193,7 @@ app.get('/updateuniversity/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updateuniversity/:id',async(req,resp)=>{
+app.put('/updateuniversity/:id', async (req,resp) => {
     const result = await University.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -197,7 +201,7 @@ app.put('/updateuniversity/:id',async(req,resp)=>{
     resp.send(result)
 })
 
-app.get('/searchuniversity/:key',async(req,resp)=>{
+app.get('/searchuniversity/:key', async (req,resp) => {
     const university = await University.find({
         '$or':[
             {name:{$regex:req.params.key}},
@@ -216,7 +220,7 @@ app.get('/searchuniversity/:key',async(req,resp)=>{
 
 // Courses
 
-app.get('/courses',async(req,resp)=>{
+app.get('/courses', async (req,resp) => {
     const course = await Course.find()
     if(course.length>0){
         resp.send(course)
@@ -226,30 +230,33 @@ app.get('/courses',async(req,resp)=>{
     }
 })
 
-// avoid dublicate data
-app.post('/courses',async(req,resp)=>{
-    const result = await Course.findOne(req.body)
-    if(result){
-        resp.send(result)
+app.post('/addcourse', async (req,resp) => {
+    const { fname, sname } = req.body
+
+    if(!fname || !sname){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no course found'})
+        const courseExists = await Course.findOne({ fname: fname, sname: sname })
+
+        if(courseExists){
+            resp.status(400).json({ error: 'Course Already Exists' })
+        }
+        else{
+            const course = new Course({ fname, sname })
+            await course.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
+        }
     }
 })
 
-app.post('/addcourse',async(req,resp)=>{
-    const course = new Course(req.body)
-    const result = await course.save()
-    resp.send(result)
-})
-
-app.delete('/deletecourse/:id',async(req,resp)=>{
+app.delete('/deletecourse/:id', async (req,resp) => {
     const result = await Course.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
-app.get('/updatecourse/:id',async(req,resp)=>{
+app.get('/updatecourse/:id', async (req,resp) => {
     const course = await Course.findOne({_id:req.params.id})
     if(course){
         resp.send(course)
@@ -259,7 +266,7 @@ app.get('/updatecourse/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updatecourse/:id',async(req,resp)=>{
+app.put('/updatecourse/:id', async (req,resp) => {
     const result = await Course.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -267,7 +274,7 @@ app.put('/updatecourse/:id',async(req,resp)=>{
     resp.send(result)
 })
 
-app.get('/searchcourse/:key',async(req,resp)=>{
+app.get('/searchcourse/:key', async (req,resp) => {
     const course = await Course.find({
         '$or':[
             {fname:{$regex:req.params.key}},
@@ -286,7 +293,7 @@ app.get('/searchcourse/:key',async(req,resp)=>{
 
 // Specialisations
 
-app.get('/specialisations',async(req,resp)=>{
+app.get('/specialisations', async (req,resp) => {
     const specialisation = await Specialisation.find()
     if(specialisation.length>0){
         resp.send(specialisation)
@@ -296,30 +303,33 @@ app.get('/specialisations',async(req,resp)=>{
     }
 })
 
-// avoid dublicate data
-app.post('/specialisations',async(req,resp)=>{
-    const result = await Specialisation.findOne(req.body)
-    if(result){
-        resp.send(result)
+app.post('/addspecialisation', async (req,resp) => {
+    const { fname, sname } = req.body
+
+    if(!fname || !sname){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no specialisation found'})
+        const specialisationExists = await Specialisation.findOne({ fname: fname, sname: sname })
+
+        if(specialisationExists){
+            resp.status(400).json({ error: 'Specialisation Already Exists' })
+        }
+        else{
+            const specialisation = new Specialisation({ fname, sname })
+            await specialisation.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
+        }
     }
 })
 
-app.post('/addspecialisation',async(req,resp)=>{
-    const specialisation = new Specialisation(req.body)
-    const result = await specialisation.save()
-    resp.send(result)
-})
-
-app.delete('/deletespecialisation/:id',async(req,resp)=>{
+app.delete('/deletespecialisation/:id', async (req,resp) => {
     const result = await Specialisation.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
-app.get('/updatespecialisation/:id',async(req,resp)=>{
+app.get('/updatespecialisation/:id', async (req,resp) => {
     const specialisation = await Specialisation.findOne({_id:req.params.id})
     if(specialisation){
         resp.send(specialisation)
@@ -329,7 +339,7 @@ app.get('/updatespecialisation/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updatespecialisation/:id',async(req,resp)=>{
+app.put('/updatespecialisation/:id', async (req,resp) => {
     const result = await Specialisation.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -337,7 +347,7 @@ app.put('/updatespecialisation/:id',async(req,resp)=>{
     resp.send(result)
 })
 
-app.get('/searchspecialisation/:key',async(req,resp)=>{
+app.get('/searchspecialisation/:key', async (req,resp) => {
     const specialisation = await Specialisation.find({
         '$or':[
             {fname:{$regex:req.params.key}},
@@ -356,7 +366,7 @@ app.get('/searchspecialisation/:key',async(req,resp)=>{
 
 // Session
 
-app.get('/sessions',async(req,resp)=>{
+app.get('/sessions', async (req,resp) => {
     const session = await Session.find()
     if(session.length>0){
         resp.send(session)
@@ -366,31 +376,34 @@ app.get('/sessions',async(req,resp)=>{
     }
 })
 
-// avoid dublicate data
-app.post('/sessions',async(req,resp)=>{
-    const result = await Session.findOne(req.body)
-    if(result){
-        resp.send(result)
+app.post('/addsession', async (req,resp) => {
+    const { start, end } = req.body
+
+    if(!start || !end){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no session found'})
+        const sessionExists = await Session.findOne({ start: start, end: end })
+
+        if(sessionExists){
+            resp.status(400).json({ error: 'Session Already Exists' })
+        }
+        else{
+            const session = new Session({ start, end })
+            await session.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
+        }
     }
 })
 
-app.post('/addsession',async(req,resp)=>{
-    const session = new Session(req.body)
-    const result = await session.save()
-    resp.send(result)
-})
-
-app.delete('/deletesession/:id',async(req,resp)=>{
+app.delete('/deletesession/:id', async (req,resp) => {
     const result = await Session.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 
 // pre-filled data
-app.get('/updatesession/:id',async(req,resp)=>{
+app.get('/updatesession/:id', async (req,resp) => {
     const session = await Session.findOne({_id:req.params.id})
     if(session){
         resp.send(session)
@@ -400,7 +413,7 @@ app.get('/updatesession/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updatesession/:id',async(req,resp)=>{
+app.put('/updatesession/:id', async (req,resp) => {
     const result = await Session.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -412,7 +425,7 @@ app.put('/updatesession/:id',async(req,resp)=>{
 
 // EMITenures
 
-app.get('/emitenures',async(req,resp)=>{
+app.get('/emitenures', async (req,resp) => {
     const emitenure = await EMITenure.find()
     if(emitenure.length>0){
         resp.send(emitenure)
@@ -422,31 +435,39 @@ app.get('/emitenures',async(req,resp)=>{
     }
 })
 
-// avoid dublicate data
-app.post('/emitenures',async(req,resp)=>{
-    const result = await EMITenure.findOne(req.body)
-    if(result){
-        resp.send(result)
+app.post('/addemitenure', async (req,resp) => {
+    const { month } = req.body
+
+    if(!month){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no emitenure found'})
+        const emitenureExists = await EMITenure.findOne({ month: month })
+
+        if(emitenureExists){
+            resp.status(400).json({ error: 'EMI Tenure Already Exists' })
+        }
+        else{
+            if(month>0 && month<100){
+                const emitenure = new EMITenure({ month })
+                await emitenure.save()
+                resp.status(201).json({ message: 'Registered Successfully' })
+            }
+            else{
+                resp.status(400).json({ error: 'Invalid Input' })
+            }
+        }
     }
 })
 
-app.post('/addemitenure',async(req,resp)=>{
-    const emitenure = new EMITenure(req.body)
-    const result = await emitenure.save()
-    resp.send(result)
-})
-
-app.delete('/deleteemitenure/:id',async(req,resp)=>{
+app.delete('/deleteemitenure/:id', async (req,resp) => {
     const result = await EMITenure.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 
 // pre-filled data
-app.get('/updateemitenure/:id',async(req,resp)=>{
+app.get('/updateemitenure/:id', async (req,resp) => {
     const emitenure = await EMITenure.findOne({_id:req.params.id})
     if(emitenure){
         resp.send(emitenure)
@@ -456,7 +477,7 @@ app.get('/updateemitenure/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updateemitenure/:id',async(req,resp)=>{
+app.put('/updateemitenure/:id', async (req,resp) => {
     const result = await EMITenure.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -468,7 +489,7 @@ app.put('/updateemitenure/:id',async(req,resp)=>{
 
 // FeeStructure
 
-app.get('/feestructure',async(req,resp)=>{
+app.get('/feestructure', async (req,resp) => {
     const feestructure = await FeeStructure.find()
     if(feestructure.length>0){
         resp.send(feestructure)
@@ -477,31 +498,34 @@ app.get('/feestructure',async(req,resp)=>{
         resp.send({result:'no feestructure found'})
     }
 })
+///////////////////////////////////////////////////////////////////////////////////////
+app.post('/addfeestructure', async (req,resp) => {
+    const { uname, cname, sname, month1, month3, month6, month9, month12 } = req.body
 
-// avoid dublicate data
-app.post('/feestructure',async(req,resp)=>{
-    const result = await FeeStructure.findOne(req.body)
-    if(result){
-        resp.send(result)
+    if(!uname || !cname || !sname || !month1 || !month3 || !month6 || !month9 || !month12){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no feestructure found'})
+        const feestructureExists = await FeeStructure.findOne({ uname: uname, cname: cname, sname: sname })
+
+        if(feestructureExists){
+            resp.status(400).json({ error: 'Fee Structure Already Exists' })
+        }
+        else{
+            const feestructure = new FeeStructure({ uname, cname, sname, month1, month3, month6, month9, month12 })
+            await feestructure.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
+        }
     }
 })
-
-app.post('/addfeestructure',async(req,resp)=>{
-    const feestructure = new FeeStructure(req.body)
-    const result = await feestructure.save()
-    resp.send(result)
-})
-
-app.delete('/deletefeestructure/:id',async(req,resp)=>{
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+app.delete('/deletefeestructure/:id', async (req,resp) => {
     const result = await FeeStructure.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
-app.get('/updatefeestructure/:id',async(req,resp)=>{
+app.get('/updatefeestructure/:id', async (req,resp) => {
     const feestructure = await FeeStructure.findOne({_id:req.params.id})
     if(feestructure){
         resp.send(feestructure)
@@ -511,7 +535,7 @@ app.get('/updatefeestructure/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updatefeestructure/:id',async(req,resp)=>{
+app.put('/updatefeestructure/:id', async (req,resp) => {
     const result = await FeeStructure.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -519,7 +543,7 @@ app.put('/updatefeestructure/:id',async(req,resp)=>{
     resp.send(result)
 })
 
-app.get('/searchfeestructure/:key',async(req,resp)=>{
+app.get('/searchfeestructure/:key', async (req,resp) => {
     const feestructure = await FeeStructure.find({
         '$or':[
             {uname:{$regex:req.params.key}},
@@ -542,10 +566,9 @@ app.get('/searchfeestructure/:key',async(req,resp)=>{
 
 
 
-
 // Students
 
-app.get('/students',async(req,resp)=>{
+app.get('/students', async (req,resp) => {
     const student = await Student.find()
     if(student.length>0){
         resp.send(student)
@@ -555,30 +578,33 @@ app.get('/students',async(req,resp)=>{
     }
 })
 
-// avoid dublicate data
-app.post('/students',async(req,resp)=>{
-    const result = await Student.findOne(req.body)
-    if(result){
-        resp.send(result)
+app.post('/addstudent', async (req,resp) => {
+    const { name, father, mother, dob, email, contact, altContact, idProof, address, photo, level, password, post } = req.body
+
+    if(!name || !father || !mother || !dob || !email || !contact || !altContact || !idProof || !address || !photo || !level || !password || !post){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
-    else{
-        resp.send({result:'no student found'})
+    else {
+        const studentExists = await Student.findOne({ email: email })
+
+        if (studentExists) {
+            resp.status(400).json({ error: 'Email Already Exists' })
+        }
+        else {
+            const student = new Student({ name, father, mother, dob, email, contact, altContact, idProof, address, photo, level, password, post })
+            await student.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
+        }
     }
 })
 
-app.post('/addstudent',async(req,resp)=>{
-    const student = new Student(req.body)
-    const result = await student.save()
-    resp.send(result)
-})
-
-app.delete('/deletestudent/:id',async(req,resp)=>{
+app.delete('/deletestudent/:id', async (req,resp) => {
     const result = await Student.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
-app.get('/updatestudent/:id',async(req,resp)=>{
+app.get('/updatestudent/:id', async (req,resp) => {
     const student = await Student.findOne({_id:req.params.id})
     if(student){
         resp.send(student)
@@ -588,7 +614,7 @@ app.get('/updatestudent/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updatestudent/:id',async(req,resp)=>{
+app.put('/updatestudent/:id', async (req,resp) => {
     const result = await Student.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -596,7 +622,7 @@ app.put('/updatestudent/:id',async(req,resp)=>{
     resp.send(result)
 })
 
-app.get('/searchstudent/:key',async(req,resp)=>{
+app.get('/searchstudent/:key', async (req,resp) => {
     const student = await Student.find({
         '$or':[
             {name:{$regex:req.params.key}},
@@ -620,7 +646,7 @@ app.get('/searchstudent/:key',async(req,resp)=>{
 
 // Franchises
 
-app.get('/franchises',async(req,resp)=>{
+app.get('/franchises', async (req,resp) => {
     const franchise = await Franchise.find()
     if(franchise.length>0){
         resp.send(franchise)
@@ -630,30 +656,33 @@ app.get('/franchises',async(req,resp)=>{
     }
 })
 
-// avoid dublicate data
-app.post('/franchises',async(req,resp)=>{
-    const result = await Franchise.findOne(req.body)
-    if(result){
-        resp.send(result)
+app.post('/addfranchise', async (req,resp) => {
+    const { fname, cname, ctype, address, email, contact, altContact, idProof, account, level } = req.body
+
+    if(!fname || !cname || !ctype || !address || !email || !contact || !altContact || !idProof || !account || !level){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no franchise found'})
+        const franchiseExists = await Franchise.findOne({ email: email })
+
+        if(franchiseExists){
+            resp.status(400).json({ error: 'Email Already Exists' })
+        }
+        else{
+            const franchise = new Franchise({ fname, cname, ctype, address, email, contact, altContact, idProof, account, level })
+            await franchise.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
+        }
     }
 })
 
-app.post('/addfranchise',async(req,resp)=>{
-    const franchise = new Franchise(req.body)
-    const result = await franchise.save()
-    resp.send(result)
-})
-
-app.delete('/deletefranchise/:id',async(req,resp)=>{
+app.delete('/deletefranchise/:id', async (req,resp) => {
     const result = await Franchise.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
-app.get('/updatefranchise/:id',async(req,resp)=>{
+app.get('/updatefranchise/:id', async (req,resp) => {
     const franchise = await Franchise.findOne({_id:req.params.id})
     if(franchise){
         resp.send(franchise)
@@ -663,7 +692,7 @@ app.get('/updatefranchise/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updatefranchise/:id',async(req,resp)=>{
+app.put('/updatefranchise/:id', async (req,resp) => {
     const result = await Franchise.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -671,7 +700,7 @@ app.put('/updatefranchise/:id',async(req,resp)=>{
     resp.send(result)
 })
 
-app.get('/searchfranchise/:key',async(req,resp)=>{
+app.get('/searchfranchise/:key', async (req,resp) => {
     const franchise = await Franchise.find({
         '$or':[
             {fname:{$regex:req.params.key}},
@@ -697,7 +726,7 @@ app.get('/searchfranchise/:key',async(req,resp)=>{
 // Referral
 
 // pre-filled data
-app.get('/updatereferral/:id',async(req,resp)=>{
+app.get('/updatereferral/:id', async (req,resp) => {
     const referral = await Referral.findOne({_id:req.params.id})
     if(referral){
         resp.send(referral)
@@ -707,7 +736,7 @@ app.get('/updatereferral/:id',async(req,resp)=>{
     }
 })
 
-app.put('/updatereferral/:id',async(req,resp)=>{
+app.put('/updatereferral/:id', async (req,resp) => {
     const result = await Referral.updateOne(
         {_id:req.params.id},
         {$set:req.body}
@@ -719,7 +748,7 @@ app.put('/updatereferral/:id',async(req,resp)=>{
 
 // Details
 
-app.get('/details',async(req,resp)=>{
+app.get('/details', async (req,resp) => {
     const detail = await Detail.find()
     if(detail.length>0){
         resp.send(detail)
@@ -729,30 +758,32 @@ app.get('/details',async(req,resp)=>{
     }
 })
 
-// avoid dublicate data
-app.post('/details',async(req,resp)=>{
-    const result = await Detail.findOne(req.body)
-    if(result){
-        resp.send(result)
+app.post('/adddetail', async (req,resp) => {
+    const { studentName, courseName, specialisationName, universityName, sessionYear, emiTenure, emiAmount } = req.body
+
+    if(!studentName || !courseName || !specialisationName || !universityName || !sessionYear || !emiTenure || !emiAmount){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no detail found'})
+        // const detailExists = await Detail.findOne({ studentName: studentName })
+
+        // if(detailExists){
+        //     resp.status(400).json({ error: 'Student Already Exists' })
+        // }
+        // else{
+            const detail = new Detail({ studentName, courseName, specialisationName, universityName, sessionYear, emiTenure, emiAmount })
+            await detail.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
+        // }
     }
 })
 
-
-app.post('/adddetail',async(req,resp)=>{
-    const detail = new Detail(req.body)
-    const result = await detail.save()
-    resp.send(result)
-})
-
-app.delete('/deletedetail/:id',async(req,resp)=>{
+app.delete('/deletedetail/:id', async (req,resp) => {
     const result = await Detail.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
-app.get('/searchdetail/:key',async(req,resp)=>{
+app.get('/searchdetail/:key', async (req,resp) => {
     const detail = await Detail.find({
         '$or':[
             {studentName:{$regex:req.params.key}},
@@ -773,7 +804,7 @@ app.get('/searchdetail/:key',async(req,resp)=>{
 })
 
 
-app.listen(PORT,()=>{
+app.listen(PORT,() => {
     console.log(' ')
     console.log('You can now view backend in the browser.')
     console.log(' ')
