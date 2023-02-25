@@ -23,7 +23,6 @@ const Detail = require('./db/Detail')
 app.use(express.json())
 app.use(cors())
 
-// blank
 // homepage
 app.get('/', (req, resp) => {
     resp.send(`
@@ -32,11 +31,11 @@ app.get('/', (req, resp) => {
                 <style>
                     body {display: flex; justify-content: center; align-items: center; margin: 0;}
                     h1 {background-color: black; border-radius: 50%; padding: 50px; box-shadow: 0px 0px 30px 10px gray;}
-                    a {text-decoration: none; color: green;}
+                    a {text-decoration: none; color: #5cb85c;}
                 </style>
             </head>
             <body>
-                <h1><a href="https://the.iice.foundation">IICE Foundation</a></h1>
+                <h1><a href="https://iice.foundation">IICE Foundation</a></h1>
             </body>
         </html>
     `);
@@ -45,8 +44,6 @@ app.get('/', (req, resp) => {
 /////////////////////////////////////////
 const multer = require("multer");
 const File = require('./db/File');
-
-app.use(express.static(__dirname+'/uploads'))
 
 const Storage = multer.diskStorage({
     destination:'uploads',
@@ -672,6 +669,13 @@ app.get('/searchfranchise/:key',async(req,resp)=>{
 
 
 // Referral
+
+// for 1st time (when no data)
+// app.post('/referral',async(req,resp)=>{
+//     let referral = new Referral(req.body)
+//     let result = await referral.save()
+//     resp.send(result)
+// })
 
 // pre-filled data
 app.get('/updatereferral/:id',async(req,resp)=>{

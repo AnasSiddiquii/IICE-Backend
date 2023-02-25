@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "homepage": "https://new.iice.foundation",
+  "homepage": "https://the.iice.foundation",
   "main": "index.js",
   "scripts": {
     "startx": "node index.js",
