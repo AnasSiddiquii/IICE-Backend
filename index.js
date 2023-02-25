@@ -57,47 +57,73 @@ const Storage = multer.diskStorage({
 const upload = multer({storage:Storage})
 
 app.post("/img", upload.single('image'), async (req, resp) => {
-    let user = new File({img:req.file.filename,name:req.body.name});
-    let result = await user.save();
+    const user = new File({img:req.file.filename,name:req.body.name});
+    const result = await user.save();
     resp.send(result)
 })
 
 app.get("/img", async (req,resp)=>{
-    let data = await File.find()
+    const data = await File.find()
     resp.send(data)
 })
 
 app.delete('/img/:id', async (req,resp) => {
-    let result = await File.deleteOne()
+    const result = await File.deleteOne()
     resp.send(result)
 })
 /////////////////////////////////////////
 
 // admin login
-app.post('/signup',async(req,resp)=>{
-    let user = new User(req.body)
-    let result = await user.save()
-    resp.send(result)
-})
-
-app.post('/login',async(req,resp)=>{
-    const login = await User.findOne({email : req.body.email})
-    if(login){
-        let result = await bcrypt.compare(req.body.password, login.password)
-        if(result){
-            resp.send(login)
+app.post('/signup', async (req,resp) => {
+    const { name, email, password, cpassword, post } = req.body
+    
+    if (!name || !email || !password || !cpassword || !post) {
+        return resp.status(400).json({ error: 'Please Fill All Fields' })
+    }
+    else {
+        const userExist = await User.findOne({ email: email })
+        
+        if (userExist) {
+            return resp.status(400).json({ error: 'Email Already Exists'})
         }
-        else{
-            resp.send({result:'Invalid'})
+        else if (password != cpassword){
+            return resp.status(400).json({ error: 'Password Do Not Match'})
+        }
+        else {
+            const user = new User({ name, email, password, cpassword, post })
+            await user.save()
+            resp.status(201).json({ message: 'Registered Successfully' })
         }
     }
-    else{
-        resp.send({result:'Invalid'})
+})
+
+app.post('/login', async (req,resp) => {
+    const { email, password } = req.body
+    
+    if (!email || !password) {
+        return resp.status(400).json({ error: 'Please Fill All Fields' })
+    }
+    else {
+        const userExist = await User.findOne({ email: email })
+
+        if (userExist) {
+            const match = await bcrypt.compare(password, userExist.password)
+                        
+            if (!match) {
+                return resp.status(400).json({ error: 'Invalid Credientials'})
+            }
+            else {
+                return resp.status(201).json({ message: 'Login Successful' })
+            }
+        }
+        else {
+            return resp.status(400).json({ error: 'Invalid Credientials'})
+        }
     }
 })
 
 app.get('/users',async(req,resp)=>{
-    let user = await User.find()
+    const user = await User.find()
     if(user.length>0){
         resp.send(user)
     }
@@ -108,7 +134,7 @@ app.get('/users',async(req,resp)=>{
 
 // student login
 app.post('/std',async(req,resp)=>{
-    let result = await Student.findOne(req.body).select(['name','email','level','post'])
+    const result = await Student.findOne(req.body).select(['name','email','level','post'])
     if(result){
         resp.send(result)
     }
@@ -121,7 +147,7 @@ app.post('/std',async(req,resp)=>{
 // Universities
 
 app.get('/universities',async(req,resp)=>{
-    let university = await University.find()
+    const university = await University.find()
     if(university.length>0){
         resp.send(university)
     }
@@ -132,7 +158,7 @@ app.get('/universities',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/universities',async(req,resp)=>{
-    let result = await University.findOne(req.body)
+    const result = await University.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -142,19 +168,19 @@ app.post('/universities',async(req,resp)=>{
 })
 
 app.post('/adduniversity',async(req,resp)=>{
-    let university = new University(req.body)
-    let result = await university.save()
+    const university = new University(req.body)
+    const result = await university.save()
     resp.send(result)
 })
 
 app.delete('/deleteuniversity/:id',async(req,resp)=>{
-    let result = await University.deleteOne({_id:req.params.id})
+    const result = await University.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
 app.get('/updateuniversity/:id',async(req,resp)=>{
-    let university = await University.findOne({_id:req.params.id})
+    const university = await University.findOne({_id:req.params.id})
     if(university){
         resp.send(university)
     }
@@ -164,7 +190,7 @@ app.get('/updateuniversity/:id',async(req,resp)=>{
 })
 
 app.put('/updateuniversity/:id',async(req,resp)=>{
-    let result = await University.updateOne(
+    const result = await University.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -172,7 +198,7 @@ app.put('/updateuniversity/:id',async(req,resp)=>{
 })
 
 app.get('/searchuniversity/:key',async(req,resp)=>{
-    let university = await University.find({
+    const university = await University.find({
         '$or':[
             {name:{$regex:req.params.key}},
             {state:{$regex:req.params.key}}
@@ -191,7 +217,7 @@ app.get('/searchuniversity/:key',async(req,resp)=>{
 // Courses
 
 app.get('/courses',async(req,resp)=>{
-    let course = await Course.find()
+    const course = await Course.find()
     if(course.length>0){
         resp.send(course)
     }
@@ -202,7 +228,7 @@ app.get('/courses',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/courses',async(req,resp)=>{
-    let result = await Course.findOne(req.body)
+    const result = await Course.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -212,19 +238,19 @@ app.post('/courses',async(req,resp)=>{
 })
 
 app.post('/addcourse',async(req,resp)=>{
-    let course = new Course(req.body)
-    let result = await course.save()
+    const course = new Course(req.body)
+    const result = await course.save()
     resp.send(result)
 })
 
 app.delete('/deletecourse/:id',async(req,resp)=>{
-    let result = await Course.deleteOne({_id:req.params.id})
+    const result = await Course.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
 app.get('/updatecourse/:id',async(req,resp)=>{
-    let course = await Course.findOne({_id:req.params.id})
+    const course = await Course.findOne({_id:req.params.id})
     if(course){
         resp.send(course)
     }
@@ -234,7 +260,7 @@ app.get('/updatecourse/:id',async(req,resp)=>{
 })
 
 app.put('/updatecourse/:id',async(req,resp)=>{
-    let result = await Course.updateOne(
+    const result = await Course.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -242,7 +268,7 @@ app.put('/updatecourse/:id',async(req,resp)=>{
 })
 
 app.get('/searchcourse/:key',async(req,resp)=>{
-    let course = await Course.find({
+    const course = await Course.find({
         '$or':[
             {fname:{$regex:req.params.key}},
             {sname:{$regex:req.params.key}},
@@ -261,7 +287,7 @@ app.get('/searchcourse/:key',async(req,resp)=>{
 // Specialisations
 
 app.get('/specialisations',async(req,resp)=>{
-    let specialisation = await Specialisation.find()
+    const specialisation = await Specialisation.find()
     if(specialisation.length>0){
         resp.send(specialisation)
     }
@@ -272,7 +298,7 @@ app.get('/specialisations',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/specialisations',async(req,resp)=>{
-    let result = await Specialisation.findOne(req.body)
+    const result = await Specialisation.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -282,19 +308,19 @@ app.post('/specialisations',async(req,resp)=>{
 })
 
 app.post('/addspecialisation',async(req,resp)=>{
-    let specialisation = new Specialisation(req.body)
-    let result = await specialisation.save()
+    const specialisation = new Specialisation(req.body)
+    const result = await specialisation.save()
     resp.send(result)
 })
 
 app.delete('/deletespecialisation/:id',async(req,resp)=>{
-    let result = await Specialisation.deleteOne({_id:req.params.id})
+    const result = await Specialisation.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
 app.get('/updatespecialisation/:id',async(req,resp)=>{
-    let specialisation = await Specialisation.findOne({_id:req.params.id})
+    const specialisation = await Specialisation.findOne({_id:req.params.id})
     if(specialisation){
         resp.send(specialisation)
     }
@@ -304,7 +330,7 @@ app.get('/updatespecialisation/:id',async(req,resp)=>{
 })
 
 app.put('/updatespecialisation/:id',async(req,resp)=>{
-    let result = await Specialisation.updateOne(
+    const result = await Specialisation.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -312,7 +338,7 @@ app.put('/updatespecialisation/:id',async(req,resp)=>{
 })
 
 app.get('/searchspecialisation/:key',async(req,resp)=>{
-    let specialisation = await Specialisation.find({
+    const specialisation = await Specialisation.find({
         '$or':[
             {fname:{$regex:req.params.key}},
             {sname:{$regex:req.params.key}},
@@ -331,7 +357,7 @@ app.get('/searchspecialisation/:key',async(req,resp)=>{
 // Session
 
 app.get('/sessions',async(req,resp)=>{
-    let session = await Session.find()
+    const session = await Session.find()
     if(session.length>0){
         resp.send(session)
     }
@@ -342,7 +368,7 @@ app.get('/sessions',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/sessions',async(req,resp)=>{
-    let result = await Session.findOne(req.body)
+    const result = await Session.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -352,20 +378,20 @@ app.post('/sessions',async(req,resp)=>{
 })
 
 app.post('/addsession',async(req,resp)=>{
-    let session = new Session(req.body)
-    let result = await session.save()
+    const session = new Session(req.body)
+    const result = await session.save()
     resp.send(result)
 })
 
 app.delete('/deletesession/:id',async(req,resp)=>{
-    let result = await Session.deleteOne({_id:req.params.id})
+    const result = await Session.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 
 // pre-filled data
 app.get('/updatesession/:id',async(req,resp)=>{
-    let session = await Session.findOne({_id:req.params.id})
+    const session = await Session.findOne({_id:req.params.id})
     if(session){
         resp.send(session)
     }
@@ -375,7 +401,7 @@ app.get('/updatesession/:id',async(req,resp)=>{
 })
 
 app.put('/updatesession/:id',async(req,resp)=>{
-    let result = await Session.updateOne(
+    const result = await Session.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -387,7 +413,7 @@ app.put('/updatesession/:id',async(req,resp)=>{
 // EMITenures
 
 app.get('/emitenures',async(req,resp)=>{
-    let emitenure = await EMITenure.find()
+    const emitenure = await EMITenure.find()
     if(emitenure.length>0){
         resp.send(emitenure)
     }
@@ -398,7 +424,7 @@ app.get('/emitenures',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/emitenures',async(req,resp)=>{
-    let result = await EMITenure.findOne(req.body)
+    const result = await EMITenure.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -408,20 +434,20 @@ app.post('/emitenures',async(req,resp)=>{
 })
 
 app.post('/addemitenure',async(req,resp)=>{
-    let emitenure = new EMITenure(req.body)
-    let result = await emitenure.save()
+    const emitenure = new EMITenure(req.body)
+    const result = await emitenure.save()
     resp.send(result)
 })
 
 app.delete('/deleteemitenure/:id',async(req,resp)=>{
-    let result = await EMITenure.deleteOne({_id:req.params.id})
+    const result = await EMITenure.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 
 // pre-filled data
 app.get('/updateemitenure/:id',async(req,resp)=>{
-    let emitenure = await EMITenure.findOne({_id:req.params.id})
+    const emitenure = await EMITenure.findOne({_id:req.params.id})
     if(emitenure){
         resp.send(emitenure)
     }
@@ -431,7 +457,7 @@ app.get('/updateemitenure/:id',async(req,resp)=>{
 })
 
 app.put('/updateemitenure/:id',async(req,resp)=>{
-    let result = await EMITenure.updateOne(
+    const result = await EMITenure.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -443,7 +469,7 @@ app.put('/updateemitenure/:id',async(req,resp)=>{
 // FeeStructure
 
 app.get('/feestructure',async(req,resp)=>{
-    let feestructure = await FeeStructure.find()
+    const feestructure = await FeeStructure.find()
     if(feestructure.length>0){
         resp.send(feestructure)
     }
@@ -454,7 +480,7 @@ app.get('/feestructure',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/feestructure',async(req,resp)=>{
-    let result = await FeeStructure.findOne(req.body)
+    const result = await FeeStructure.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -464,19 +490,19 @@ app.post('/feestructure',async(req,resp)=>{
 })
 
 app.post('/addfeestructure',async(req,resp)=>{
-    let feestructure = new FeeStructure(req.body)
-    let result = await feestructure.save()
+    const feestructure = new FeeStructure(req.body)
+    const result = await feestructure.save()
     resp.send(result)
 })
 
 app.delete('/deletefeestructure/:id',async(req,resp)=>{
-    let result = await FeeStructure.deleteOne({_id:req.params.id})
+    const result = await FeeStructure.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
 app.get('/updatefeestructure/:id',async(req,resp)=>{
-    let feestructure = await FeeStructure.findOne({_id:req.params.id})
+    const feestructure = await FeeStructure.findOne({_id:req.params.id})
     if(feestructure){
         resp.send(feestructure)
     }
@@ -486,7 +512,7 @@ app.get('/updatefeestructure/:id',async(req,resp)=>{
 })
 
 app.put('/updatefeestructure/:id',async(req,resp)=>{
-    let result = await FeeStructure.updateOne(
+    const result = await FeeStructure.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -494,7 +520,7 @@ app.put('/updatefeestructure/:id',async(req,resp)=>{
 })
 
 app.get('/searchfeestructure/:key',async(req,resp)=>{
-    let feestructure = await FeeStructure.find({
+    const feestructure = await FeeStructure.find({
         '$or':[
             {uname:{$regex:req.params.key}},
             {cname:{$regex:req.params.key}},
@@ -520,7 +546,7 @@ app.get('/searchfeestructure/:key',async(req,resp)=>{
 // Students
 
 app.get('/students',async(req,resp)=>{
-    let student = await Student.find()
+    const student = await Student.find()
     if(student.length>0){
         resp.send(student)
     }
@@ -531,7 +557,7 @@ app.get('/students',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/students',async(req,resp)=>{
-    let result = await Student.findOne(req.body)
+    const result = await Student.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -541,19 +567,19 @@ app.post('/students',async(req,resp)=>{
 })
 
 app.post('/addstudent',async(req,resp)=>{
-    let student = new Student(req.body)
-    let result = await student.save()
+    const student = new Student(req.body)
+    const result = await student.save()
     resp.send(result)
 })
 
 app.delete('/deletestudent/:id',async(req,resp)=>{
-    let result = await Student.deleteOne({_id:req.params.id})
+    const result = await Student.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
 app.get('/updatestudent/:id',async(req,resp)=>{
-    let student = await Student.findOne({_id:req.params.id})
+    const student = await Student.findOne({_id:req.params.id})
     if(student){
         resp.send(student)
     }
@@ -563,7 +589,7 @@ app.get('/updatestudent/:id',async(req,resp)=>{
 })
 
 app.put('/updatestudent/:id',async(req,resp)=>{
-    let result = await Student.updateOne(
+    const result = await Student.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -571,7 +597,7 @@ app.put('/updatestudent/:id',async(req,resp)=>{
 })
 
 app.get('/searchstudent/:key',async(req,resp)=>{
-    let student = await Student.find({
+    const student = await Student.find({
         '$or':[
             {name:{$regex:req.params.key}},
             {father:{$regex:req.params.key}},
@@ -595,7 +621,7 @@ app.get('/searchstudent/:key',async(req,resp)=>{
 // Franchises
 
 app.get('/franchises',async(req,resp)=>{
-    let franchise = await Franchise.find()
+    const franchise = await Franchise.find()
     if(franchise.length>0){
         resp.send(franchise)
     }
@@ -606,7 +632,7 @@ app.get('/franchises',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/franchises',async(req,resp)=>{
-    let result = await Franchise.findOne(req.body)
+    const result = await Franchise.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -616,19 +642,19 @@ app.post('/franchises',async(req,resp)=>{
 })
 
 app.post('/addfranchise',async(req,resp)=>{
-    let franchise = new Franchise(req.body)
-    let result = await franchise.save()
+    const franchise = new Franchise(req.body)
+    const result = await franchise.save()
     resp.send(result)
 })
 
 app.delete('/deletefranchise/:id',async(req,resp)=>{
-    let result = await Franchise.deleteOne({_id:req.params.id})
+    const result = await Franchise.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 // pre-filled data
 app.get('/updatefranchise/:id',async(req,resp)=>{
-    let franchise = await Franchise.findOne({_id:req.params.id})
+    const franchise = await Franchise.findOne({_id:req.params.id})
     if(franchise){
         resp.send(franchise)
     }
@@ -638,7 +664,7 @@ app.get('/updatefranchise/:id',async(req,resp)=>{
 })
 
 app.put('/updatefranchise/:id',async(req,resp)=>{
-    let result = await Franchise.updateOne(
+    const result = await Franchise.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -646,7 +672,7 @@ app.put('/updatefranchise/:id',async(req,resp)=>{
 })
 
 app.get('/searchfranchise/:key',async(req,resp)=>{
-    let franchise = await Franchise.find({
+    const franchise = await Franchise.find({
         '$or':[
             {fname:{$regex:req.params.key}},
             {cname:{$regex:req.params.key}},
@@ -670,16 +696,9 @@ app.get('/searchfranchise/:key',async(req,resp)=>{
 
 // Referral
 
-// for 1st time (when no data)
-// app.post('/referral',async(req,resp)=>{
-//     let referral = new Referral(req.body)
-//     let result = await referral.save()
-//     resp.send(result)
-// })
-
 // pre-filled data
 app.get('/updatereferral/:id',async(req,resp)=>{
-    let referral = await Referral.findOne({_id:req.params.id})
+    const referral = await Referral.findOne({_id:req.params.id})
     if(referral){
         resp.send(referral)
     }
@@ -689,7 +708,7 @@ app.get('/updatereferral/:id',async(req,resp)=>{
 })
 
 app.put('/updatereferral/:id',async(req,resp)=>{
-    let result = await Referral.updateOne(
+    const result = await Referral.updateOne(
         {_id:req.params.id},
         {$set:req.body}
     )
@@ -701,7 +720,7 @@ app.put('/updatereferral/:id',async(req,resp)=>{
 // Details
 
 app.get('/details',async(req,resp)=>{
-    let detail = await Detail.find()
+    const detail = await Detail.find()
     if(detail.length>0){
         resp.send(detail)
     }
@@ -712,7 +731,7 @@ app.get('/details',async(req,resp)=>{
 
 // avoid dublicate data
 app.post('/details',async(req,resp)=>{
-    let result = await Detail.findOne(req.body)
+    const result = await Detail.findOne(req.body)
     if(result){
         resp.send(result)
     }
@@ -723,18 +742,18 @@ app.post('/details',async(req,resp)=>{
 
 
 app.post('/adddetail',async(req,resp)=>{
-    let detail = new Detail(req.body)
-    let result = await detail.save()
+    const detail = new Detail(req.body)
+    const result = await detail.save()
     resp.send(result)
 })
 
 app.delete('/deletedetail/:id',async(req,resp)=>{
-    let result = await Detail.deleteOne({_id:req.params.id})
+    const result = await Detail.deleteOne({_id:req.params.id})
     resp.send(result)
 })
 
 app.get('/searchdetail/:key',async(req,resp)=>{
-    let detail = await Detail.find({
+    const detail = await Detail.find({
         '$or':[
             {studentName:{$regex:req.params.key}},
             {courseName:{$regex:req.params.key}},
