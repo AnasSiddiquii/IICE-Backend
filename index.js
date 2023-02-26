@@ -113,7 +113,7 @@ app.post('/login', async (req,resp) => {
                 resp.status(400).json({ error: 'Invalid Credientials'})
             }
             else{
-                resp.status(202).json({ message: 'Login Successful' })
+                resp.send(userExists) // Login Successful
             }
         }
         else{
@@ -134,12 +134,27 @@ app.get( '/users', async (req,resp) => {
 
 // student login
 app.post('/std', async (req,resp) => {
-    const result = await Student.findOne(req.body).select(['name','email','level','post'])
-    if(result){
-        resp.send(result)
+    const { email, password } = req.body
+    
+    if(!email || !password){
+        resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        resp.send({result:'no user found'})
+        const userExists = await Student.findOne({ email: email })
+
+        if(userExists){
+            const match = await bcrypt.compare(password, userExists.password)
+                        
+            if(!match){
+                resp.status(400).json({ error: 'Invalid Credientials'})
+            }
+            else{
+                resp.send(userExists) // Login Successful
+            }
+        }
+        else{
+            resp.status(400).json({ error: 'Invalid Credientials'})
+        }
     }
 })
 
@@ -498,11 +513,14 @@ app.get('/feestructure', async (req,resp) => {
         resp.send({result:'no feestructure found'})
     }
 })
-///////////////////////////////////////////////////////////////////////////////////////
-app.post('/addfeestructure', async (req,resp) => {
-    const { uname, cname, sname, month1, month3, month6, month9, month12 } = req.body
 
-    if(!uname || !cname || !sname || !month1 || !month3 || !month6 || !month9 || !month12){
+app.post('/addfeestructure', async (req,resp) => {
+    const { month1, month3, month6, month9, month12, uname, cname, sname } = req.body
+    
+    if(!month1 || !month3 || !month6 || !month9 || !month12 ||  
+        !uname || uname === 'Select University' || uname === 'No Data Found' || 
+        !cname || cname === 'Select University' || cname === 'No Data Found' || 
+        !sname || sname === 'Select University' || sname === 'No Data Found' ){
         resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
@@ -512,13 +530,13 @@ app.post('/addfeestructure', async (req,resp) => {
             resp.status(400).json({ error: 'Fee Structure Already Exists' })
         }
         else{
-            const feestructure = new FeeStructure({ uname, cname, sname, month1, month3, month6, month9, month12 })
+            const feestructure = new FeeStructure({ month1, month3, month6, month9, month12, uname, cname, sname })
             await feestructure.save()
             resp.status(201).json({ message: 'Registered Successfully' })
         }
     }
 })
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 app.delete('/deletefeestructure/:id', async (req,resp) => {
     const result = await FeeStructure.deleteOne({_id:req.params.id})
     resp.send(result)
@@ -579,9 +597,10 @@ app.get('/students', async (req,resp) => {
 })
 
 app.post('/addstudent', async (req,resp) => {
-    const { name, father, mother, dob, email, contact, altContact, idProof, address, photo, level, password, post } = req.body
+    const { fname, dob, father, mother, email, address, contact, altContact, photo, idProof, password, level, post } = req.body
 
-    if(!name || !father || !mother || !dob || !email || !contact || !altContact || !idProof || !address || !photo || !level || !password || !post){
+    if(!fname || !dob || !father || !mother || !email || !address || !contact || !altContact || !photo || !idProof || !password || 
+        !level || level==='No Data Found' || level==='Select Referrer' || !post){
         resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else {
@@ -591,7 +610,7 @@ app.post('/addstudent', async (req,resp) => {
             resp.status(400).json({ error: 'Email Already Exists' })
         }
         else {
-            const student = new Student({ name, father, mother, dob, email, contact, altContact, idProof, address, photo, level, password, post })
+            const student = new Student({ fname, dob, father, mother, email, address, contact, altContact, photo, idProof, password, level, post })
             await student.save()
             resp.status(201).json({ message: 'Registered Successfully' })
         }
@@ -629,9 +648,9 @@ app.get('/searchstudent/:key', async (req,resp) => {
             {father:{$regex:req.params.key}},
             {mother:{$regex:req.params.key}},
             {email:{$regex:req.params.key}},
+            {address:{$regex:req.params.key}},
             {contact:{$regex:req.params.key}},
-            {altContact:{$regex:req.params.key}},
-            {address:{$regex:req.params.key}}
+            {altContact:{$regex:req.params.key}}
         ]
     })
     if(student.length>0){
@@ -657,9 +676,10 @@ app.get('/franchises', async (req,resp) => {
 })
 
 app.post('/addfranchise', async (req,resp) => {
-    const { fname, cname, ctype, address, email, contact, altContact, idProof, account, level } = req.body
+    const { fname, cname, ctype, email, address, account, contact, altContact, idProof, level } = req.body
 
-    if(!fname || !cname || !ctype || !address || !email || !contact || !altContact || !idProof || !account || !level){
+    if(!fname || !cname || !ctype || !email || !address || !account || !contact || !altContact || !idProof || 
+        !level || level==='No Data Found' || level==='Select Referrer'){
         resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
@@ -669,7 +689,7 @@ app.post('/addfranchise', async (req,resp) => {
             resp.status(400).json({ error: 'Email Already Exists' })
         }
         else{
-            const franchise = new Franchise({ fname, cname, ctype, address, email, contact, altContact, idProof, account, level })
+            const franchise = new Franchise({ fname, cname, ctype, email, address, account, contact, altContact, idProof, level })
             await franchise.save()
             resp.status(201).json({ message: 'Registered Successfully' })
         }
@@ -706,11 +726,11 @@ app.get('/searchfranchise/:key', async (req,resp) => {
             {fname:{$regex:req.params.key}},
             {cname:{$regex:req.params.key}},
             {ctype:{$regex:req.params.key}},
-            {address:{$regex:req.params.key}},
             {email:{$regex:req.params.key}},
+            {address:{$regex:req.params.key}},
+            {account:{$regex:req.params.key}},
             {contact:{$regex:req.params.key}},
-            {altContact:{$regex:req.params.key}},
-            {account:{$regex:req.params.key}}
+            {altContact:{$regex:req.params.key}}
         ]
     })
     if(franchise.length>0){

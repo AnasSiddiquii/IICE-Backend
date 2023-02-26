@@ -1,18 +1,6 @@
 const mongoose = require('mongoose')
 
 const FeeStructureSchema = new mongoose.Schema({
-    uname: {
-        type: String,
-        required: true
-    },
-    cname: {
-        type: String,
-        required: true
-    },
-    sname: {
-        type: String,
-        required: true
-    },
     month1: {
         type: String,
         required: true
@@ -30,6 +18,18 @@ const FeeStructureSchema = new mongoose.Schema({
         required: true
     },
     month12: {
+        type: String,
+        required: true
+    },
+    uname: {
+        type: String,
+        required: true
+    },
+    cname: {
+        type: String,
+        required: true
+    },
+    sname: {
         type: String,
         required: true
     }

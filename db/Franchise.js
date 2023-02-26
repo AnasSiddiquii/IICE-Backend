@@ -13,11 +13,15 @@ const franchiseSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    email: {
+        type: String,
+        required: true
+    },
     address: {
         type: String,
         required: true
     },
-    email: {
+    account: {
         type: String,
         required: true
     },
@@ -30,10 +34,6 @@ const franchiseSchema = new mongoose.Schema({
         required: true
     }, 
     idProof: {
-        type: String,
-        required: true
-    },
-    account: {
         type: String,
         required: true
     },
