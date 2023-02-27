@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const fileSchema = new mongoose.Schema({
-    img:String,
-    name:String
+    name:String,
+    img:String
 });
 
 module.exports = mongoose.model("files", fileSchema);

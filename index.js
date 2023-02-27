@@ -1,13 +1,19 @@
+// securities
 const dotenv = require('dotenv')
 dotenv.config({path: './config.env'})
 const PORT = process.env.PORT
-require('./db/config')
 const bcrypt = require('bcryptjs')
 
+// basics
 const express = require('express')
-const app = express()
 const cors = require('cors')
+const multer = require("multer");
+const app = express()
+app.use(express.json())
+app.use(cors())
 
+// imports
+require('./db/config')
 const User = require('./db/User')
 const University = require('./db/University')
 const Course = require('./db/Course')
@@ -19,9 +25,6 @@ const Student = require('./db/Student')
 const Franchise = require('./db/Franchise')
 const Referral = require('./db/Referral')
 const Detail = require('./db/Detail')
-
-app.use(express.json())
-app.use(cors())
 
 // homepage
 app.get('/', (req, resp)  =>  {
@@ -40,38 +43,6 @@ app.get('/', (req, resp)  =>  {
         </html>
     `);
 });
-
-/////////////////////////////////////////
-const multer = require("multer");
-const File = require('./db/File');
-
-const Storage = multer.diskStorage({
-    destination:'uploads',
-    filename:(req,file,cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + '.png' )
-        // cb(null,file.originalname)
-    }
-})
-
-const upload = multer({storage:Storage})
-
-app.post("/img", upload.single('image'),  async  (req, resp)  =>  {
-    const user = new File({img:req.file.filename,name:req.body.name});
-    const result = await user.save();
-    resp.send(result)
-})
-
-app.get("/img", async (req,resp) => {
-    const data = await File.find()
-    resp.send(data)
-})
-
-app.delete('/img/:id', async (req,resp) => {
-    const result = await File.deleteOne()
-    resp.send(result)
-})
-/////////////////////////////////////////
 
 // admin login
 app.post('/signup', async (req,resp) => {
@@ -172,23 +143,45 @@ app.get('/universities', async (req,resp) => {
     }
 })
 
-app.post('/adduniversity', async (req,resp) => {
-    const { name, logo, state } = req.body
+app.post('/checkuniversity', async (req,resp) => {
+    const { name, state } = req.body
     
-    if(!name || !logo || !state){
+    if(!name || !state){
         resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        const universityExists = await University.findOne({ name: name, state: state })
+        const userExists = await University.findOne({ name: name, state: state })
 
-        if(universityExists){
-            resp.status(400).json({ error: 'University Already Exists' })
+        if(userExists){
+            resp.status(400).json({ error: 'University Already Exists'})
         }
         else{
-            const university = new University({ name, logo, state })
-            await university.save()
-            resp.status(201).json({ message: 'Registered Successfully' })
+            resp.status(202).json({ message: 'University Do Not Exists'})
         }
+    }
+})
+
+const Storage1 = multer.diskStorage({
+    destination:'logos',
+    filename:(req,file,cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + '.png' )
+    }
+})
+
+const upload1 = multer({storage:Storage1})
+
+app.post('/adduniversity', upload1.single('logo'), async (req,resp) => {
+    try{
+        const { name, state } = req.body
+        const logo = req.file.filename
+        
+        const university = new University({ name, logo, state })
+        await university.save()
+        resp.status(201).json({ message: 'Registered Successfully' })
+    }
+    catch{
+        resp.status(400).json({ error: 'Error' })
     }
 })
 
