@@ -772,22 +772,22 @@ app.get('/details', async (req,resp) => {
 })
 
 app.post('/adddetail', async (req,resp) => {
-    const { studentName, courseName, specialisationName, universityName, sessionYear, emiTenure, emiAmount } = req.body
+    const { studentID, studentName, courseName, specialisationName, universityName, sessionYear, emiTenure, emiAmount } = req.body
 
-    if(!studentName || !courseName || !specialisationName || !universityName || !sessionYear || !emiTenure || !emiAmount){
+    if(!studentID || !studentName || !courseName || !specialisationName || !universityName || !sessionYear || !emiTenure || !emiAmount){
         resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        // const detailExists = await Detail.findOne({ studentName: studentName })
+        const detailExists = await Detail.findOne({ studentID: studentID })
 
-        // if(detailExists){
-        //     resp.status(400).json({ error: 'Student Already Exists' })
-        // }
-        // else{
-            const detail = new Detail({ studentName, courseName, specialisationName, universityName, sessionYear, emiTenure, emiAmount })
+        if(detailExists){
+            const detail = new Detail({ studentID, studentName, courseName, specialisationName, universityName, sessionYear, emiTenure, emiAmount })
             await detail.save()
             resp.status(201).json({ message: 'Registered Successfully' })
-        // }
+        }
+        else{
+            resp.status(400).json({ error: 'Student Already Exists' })
+        }
     }
 })
 
