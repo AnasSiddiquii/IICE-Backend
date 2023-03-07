@@ -150,9 +150,9 @@ app.post('/checkuniversity', async (req,resp) => {
         resp.status(400).json({ error: 'Please Fill All Fields' })
     }
     else{
-        const userExists = await University.findOne({ name: name, state: state })
+        const universityExists = await University.findOne({ name: name, state: state })
 
-        if(userExists){
+        if(universityExists){
             resp.status(400).json({ error: 'University Already Exists'})
         }
         else{
